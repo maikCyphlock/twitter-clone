@@ -1,0 +1,59 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// TODO: add dates to user,posts, comments
+model User {
+  id           String         @id @default(uuid())
+  Name         String?
+  ImgUrl       String
+  Username     String
+  Password     String
+  Bio          String?
+  Email        String         @unique
+  Posts        Post[]
+  Likes        Likes[]
+  Comment      Comment[]
+  LikesComment LikesComment[]
+}
+
+model Likes {
+  id        String @id @default(uuid())
+  UserId    String
+  PostRef   Post?  @relation(fields: [PostRefId], references: [id], onDelete: Cascade)
+  PostRefId String
+  User      User?  @relation(fields: [UserId], references: [id])
+}
+
+model LikesComment {
+  id          String   @id @default(uuid())
+  UserId      String
+  Author      Comment? @relation(fields: [UserId], references: [id], onDelete: Cascade)
+  AuthorLiked User?    @relation(fields: [Userlike], references: [id], onDelete: Cascade)
+  Userlike    String
+}
+
+model Comment {
+  id           String         @id @default(uuid())
+  Content      String
+  UserId       String
+  Author       User?          @relation(fields: [UserId], references: [id], onDelete: Cascade)
+  PostRef      Post?          @relation(fields: [PostRefId], references: [id], onDelete: Cascade)
+  PostRefId    String
+  LikesComment LikesComment[]
+}
+
+model Post {
+  id        String    @id @default(uuid())
+  Published Boolean?  @default(false)
+  Content   String?
+  AuthorId  String?
+  Author    User?     @relation(fields: [AuthorId], references: [id], onDelete: Cascade)
+  Likes     Likes[]
+  Comment   Comment[]
+}
